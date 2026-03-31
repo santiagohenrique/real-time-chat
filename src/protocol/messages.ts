@@ -12,8 +12,8 @@ type ClientEventPayloadMap = {
 export type WsMessage<
   T extends WebSocketClientEventEnum = WebSocketClientEventEnum
 > = {
-  type: T
-  payload: ClientEventPayloadMap[T]
+  event: T
+  data: ClientEventPayloadMap[T]
 }
 
 export type JoinRoomMessage = WsMessage<WebSocketClientEventEnum.JOIN_ROOM>

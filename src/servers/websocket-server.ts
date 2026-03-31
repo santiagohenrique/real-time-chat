@@ -34,7 +34,7 @@ export const dispatchMessage = (ws: WebSocket, data: RawData) => {
     return
   }
 
-  const handler = handlers[result.message.type]
+  const handler = handlers[result.message.event]
 
   handler(ws, result.message)
 }
