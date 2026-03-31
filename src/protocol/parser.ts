@@ -11,7 +11,6 @@ export const parseMessage = (data: RawData): ParseMessageResult => {
   try {
     const rawText = data.toString()
     const rawData: unknown = JSON.parse(rawText)
-
     const message = messagePayloadSchema.parse(rawData)
 
     return {

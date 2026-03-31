@@ -12,6 +12,9 @@ export const registerWebSocketServer = (server: Server) => {
   })
 
   wss.on('connection', function connection(ws, request) {
+    console.log('New client connected!')
+    console.log(`Total clients connected: ${wss.clients.size}`)
+
     ws.on('message', function message(data: RawData) {
       try {
         dispatchMessage(ws, data)
@@ -20,9 +23,19 @@ export const registerWebSocketServer = (server: Server) => {
         if (error instanceof ZodError) {
           ws.send(
             JSON.stringify({
+              event: WebSocketServerEventEnum.INVALID_SCHEMA,
+              data: {
+                message: error.issues[0]?.message ?? 'Invalid schema',
+              },
+            })
+          )
+        }
+        if (error instanceof SyntaxError) {
+          ws.send(
+            JSON.stringify({
               event: WebSocketServerEventEnum.INVALID_PAYLOAD,
               data: {
-                message: error.issues[0]?.message ?? 'Payload inválido',
+                message: 'Syntax error in payload',
               },
             })
           )
@@ -32,6 +45,7 @@ export const registerWebSocketServer = (server: Server) => {
 
     ws.on('close', function close() {
       console.log('Client disconnected')
+      console.log(`Total clients connected: ${wss.clients.size}`)
     })
   })
 
@@ -46,7 +60,7 @@ export const dispatchMessage = (ws: WebSocket, data: RawData) => {
     return
   }
 
-  const handler = handlers[result.message.event]
+  const handler = handlers[result.message.type]
 
   handler(ws, result.message)
 }

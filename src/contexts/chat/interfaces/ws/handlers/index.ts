@@ -7,7 +7,7 @@ import {
 } from '../../../../../protocol/messages'
 import { handleJoinRoom } from './join-room.handler'
 import { handleLeaveRoom } from './leave-room'
-import { handleListAvailableRooms } from './list-available-rooms'
+import { handleListAvailableRooms } from './list-available-rooms.handler'
 
 export const handlers: Record<WebSocketClientEventEnum, BaseHandler> = {
   [WebSocketClientEventEnum.JOIN_ROOM]: (ws, message) => {

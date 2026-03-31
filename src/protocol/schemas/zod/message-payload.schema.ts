@@ -2,7 +2,7 @@ import z from 'zod'
 import { WebSocketClientEventEnum } from '../../client-events'
 
 export const messagePayloadSchema = z.object({
-  event: z.enum(WebSocketClientEventEnum),
+  type: z.enum(WebSocketClientEventEnum),
   data: z.record(z.string(), z.unknown()),
 })
 

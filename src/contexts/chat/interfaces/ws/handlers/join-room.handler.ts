@@ -2,6 +2,7 @@ import { WebSocket } from 'ws'
 import { JoinRoomMessage } from '../../../../../protocol/messages'
 import { WebSocketServerEventEnum } from '../../../../../protocol/server-events'
 import { joinRoomPayloadSchema } from '../../../../../protocol/schemas/zod/join-room.schema'
+import { sendServerResponse } from '../../../../../utils/send-server-response'
 
 export const handleJoinRoom = (ws: WebSocket, message: JoinRoomMessage) => {
   const parsedPayload = joinRoomPayloadSchema.safeParse(message.data)
@@ -9,21 +10,16 @@ export const handleJoinRoom = (ws: WebSocket, message: JoinRoomMessage) => {
   if (!parsedPayload.success) {
     ws.send(
       JSON.stringify({
-        event: WebSocketServerEventEnum.INVALID_PAYLOAD,
+        type: WebSocketServerEventEnum.INVALID_SCHEMA,
         data: {
-          message: parsedPayload.error.issues[0]?.message ?? 'Payload inválido',
+          message: parsedPayload.error.issues[0]?.message ?? 'Invalid schema',
         },
       })
     )
     return
   }
 
-  ws.send(
-    JSON.stringify({
-      event: WebSocketServerEventEnum.ROOM_JOINED,
-      data: {
-        roomName: message.data.roomName,
-      },
-    })
-  )
+  sendServerResponse(ws, WebSocketServerEventEnum.USER_JOINED_ROOM, {
+    roomName: message.data.roomName,
+  })
 }
