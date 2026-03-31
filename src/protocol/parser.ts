@@ -1,5 +1,5 @@
 import { RawData } from 'ws'
-import { WebSocketClientEventEnum } from './events'
+import { WebSocketClientEventEnum } from './client-events'
 import { WsMessage } from './messages'
 
 type ParseMessageResult = {

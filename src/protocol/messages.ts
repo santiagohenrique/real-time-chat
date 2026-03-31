@@ -1,12 +1,12 @@
 import { WebSocket } from 'ws'
-import { WebSocketClientEventEnum } from './events'
+import { WebSocketClientEventEnum } from './client-events'
 
 type ClientEventPayloadMap = {
-  [WebSocketClientEventEnum.join_room]: {
+  [WebSocketClientEventEnum.JOIN_ROOM]: {
     roomName: string
   }
-  [WebSocketClientEventEnum.leave_room]: {}
-  [WebSocketClientEventEnum.list_available_rooms]: {}
+  [WebSocketClientEventEnum.LEAVE_ROOM]: {}
+  [WebSocketClientEventEnum.LIST_AVAILABLE_ROOMS]: {}
 }
 
 export type WsMessage<
@@ -16,11 +16,11 @@ export type WsMessage<
   payload: ClientEventPayloadMap[T]
 }
 
-export type JoinRoomMessage = WsMessage<WebSocketClientEventEnum.join_room>
+export type JoinRoomMessage = WsMessage<WebSocketClientEventEnum.JOIN_ROOM>
 
-export type LeaveRoomMessage = WsMessage<WebSocketClientEventEnum.leave_room>
+export type LeaveRoomMessage = WsMessage<WebSocketClientEventEnum.LEAVE_ROOM>
 
 export type ListAvailableRoomsMessage =
-  WsMessage<WebSocketClientEventEnum.list_available_rooms>
+  WsMessage<WebSocketClientEventEnum.LIST_AVAILABLE_ROOMS>
 
 export type BaseHandler = (ws: WebSocket, message: WsMessage) => void
