@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws'
-import { ListAvailableRoomsMessage } from '../../../../protocol/messages'
+import { ListAvailableRoomsMessage } from '../../../../../protocol/messages'
 
 export const handleListAvailableRooms = (
   ws: WebSocket,

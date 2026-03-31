@@ -1,3 +1,4 @@
+import { WebSocket } from 'ws'
 import { JoinRoomMessage } from '../../../../../protocol/messages'
 import { joinRoomPayloadSchema } from '../../../../../protocol/schemas/join-room'
 import { WebSocketServerEventEnum } from '../../../../../protocol/server-events'
