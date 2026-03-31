@@ -1,7 +1,10 @@
 import { server } from './servers/http-server'
 import { registerWebSocketServer } from './servers/websocket-server'
+import dotenv from 'dotenv'
 
-const PORT = 3002
+dotenv.config()
+
+const PORT = process.env.PORT || 3000
 
 registerWebSocketServer(server)
 
