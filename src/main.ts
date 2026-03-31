@@ -1,5 +1,5 @@
-import { server } from './http-server'
-import { registerWebSocketServer } from './websocket-server'
+import { server } from './servers/http-server'
+import { registerWebSocketServer } from './servers/websocket-server'
 
 const PORT = 3002
 

@@ -1,7 +1,7 @@
 import { Server } from 'http'
-import { parseMessage } from './protocol/parser'
-import { handlers } from './app/handlers'
+import { parseMessage } from '../protocol/parser'
 import { RawData, WebSocket, WebSocketServer } from 'ws'
+import { handlers } from '../contexts/chat/interfaces/ws/handlers'
 
 export const registerWebSocketServer = (server: Server) => {
   const wss = new WebSocketServer({
