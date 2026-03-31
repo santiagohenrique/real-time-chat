@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "concurrently -n typecheck,server -c yellow,cyan \"pnpm:typecheck:watch\" \"pnpm:dev:server\"",
+    "dev": "concurrently --raw -n typecheck,server -c yellow,cyan \"pnpm:typecheck:watch\" \"pnpm:dev:server\"",
     "dev:server": "ts-node-dev --respawn --transpile-only src/main.ts",
     "typecheck:watch": "tsc --noEmit --watch --preserveWatchOutput",
     "typecheck": "tsc --noEmit",
