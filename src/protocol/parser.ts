@@ -1,6 +1,6 @@
 import { RawData } from 'ws'
 import { WsMessage } from './messages'
-import { messagePayloadSchema } from './schemas/message-payload'
+import { messagePayloadSchema } from './schemas/zod/message-payload.schema'
 
 type ParseMessageResult = {
   status: boolean
@@ -20,9 +20,6 @@ export const parseMessage = (data: RawData): ParseMessageResult => {
     }
   } catch (error) {
     console.error('Error parsing message:', error)
-    return {
-      status: false,
-      message: null,
-    }
+    throw error
   }
 }

@@ -2,6 +2,8 @@ import { Server } from 'http'
 import { parseMessage } from '../protocol/parser'
 import { RawData, WebSocket, WebSocketServer } from 'ws'
 import { handlers } from '../contexts/chat/interfaces/ws/handlers'
+import { ZodError } from 'zod'
+import { WebSocketServerEventEnum } from '../protocol/server-events'
 
 export const registerWebSocketServer = (server: Server) => {
   const wss = new WebSocketServer({
@@ -15,8 +17,18 @@ export const registerWebSocketServer = (server: Server) => {
         dispatchMessage(ws, data)
       } catch (error) {
         console.error('Error processing message:', error)
+        if (error instanceof ZodError) {
+          ws.send(
+            JSON.stringify({
+              event: WebSocketServerEventEnum.INVALID_PAYLOAD,
+              data: {
+                message: error.issues[0]?.message ?? 'Payload inválido',
+              },
+            })
+          )
+        }
       }
-    })  
+    })
 
     ws.on('close', function close() {
       console.log('Client disconnected')

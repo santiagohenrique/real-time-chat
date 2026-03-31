@@ -5,7 +5,7 @@ import {
   LeaveRoomMessage,
   ListAvailableRoomsMessage,
 } from '../../../../../protocol/messages'
-import { handleJoinRoom } from './join-room'
+import { handleJoinRoom } from './join-room.handler'
 import { handleLeaveRoom } from './leave-room'
 import { handleListAvailableRooms } from './list-available-rooms'
 
