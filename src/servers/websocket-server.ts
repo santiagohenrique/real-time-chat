@@ -11,8 +11,12 @@ export const registerWebSocketServer = (server: Server) => {
 
   wss.on('connection', function connection(ws, request) {
     ws.on('message', function message(data: RawData) {
-      dispatchMessage(ws, data)
-    })
+      try {
+        dispatchMessage(ws, data)
+      } catch (error) {
+        console.error('Error processing message:', error)
+      }
+    })  
 
     ws.on('close', function close() {
       console.log('Client disconnected')
