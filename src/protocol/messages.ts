@@ -4,6 +4,7 @@ import { WebSocketClientEventEnum } from './client-events'
 type ClientEventPayloadMap = {
   [WebSocketClientEventEnum.JOIN_ROOM]: {
     roomName: string
+    userId: string
   }
   [WebSocketClientEventEnum.LEAVE_ROOM]: {}
   [WebSocketClientEventEnum.LIST_AVAILABLE_ROOMS]: {}
