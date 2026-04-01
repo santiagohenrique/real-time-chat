@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws'
-import { WebSocketClientEventEnum } from './client-events'
+import { WebSocketClientEventEnum } from './client-events.enum'
 
 type ClientEventPayloadMap = {
   [WebSocketClientEventEnum.JOIN_ROOM]: {

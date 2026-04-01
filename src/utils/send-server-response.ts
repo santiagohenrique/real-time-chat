@@ -1,5 +1,5 @@
 import { WebSocket } from 'ws'
-import { WebSocketServerEventEnum } from '../protocol/server-events'
+import { WebSocketServerEventEnum } from '../protocol/server-events.enum'
 
 export const sendServerResponse = (
   ws: WebSocket,

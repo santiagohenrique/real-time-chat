@@ -1,4 +1,4 @@
-import { WebSocketClientEventEnum } from '../../../../../protocol/client-events'
+import { WebSocketClientEventEnum } from '../../../../../protocol/client-events.enum'
 import {
   BaseHandler,
   JoinRoomMessage,

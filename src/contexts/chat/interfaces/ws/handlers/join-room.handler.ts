@@ -1,6 +1,6 @@
 import { WebSocket } from 'ws'
 import { JoinRoomMessage } from '../../../../../protocol/messages'
-import { WebSocketServerEventEnum } from '../../../../../protocol/server-events'
+import { WebSocketServerEventEnum } from '../../../../../protocol/server-events.enum'
 import { joinRoomPayloadSchema } from '../../../../../protocol/schemas/zod/join-room.schema'
 import { sendServerResponse } from '../../../../../utils/send-server-response'
 import { roomManagerService } from '.'
