@@ -1,0 +1,29 @@
+services:
+  redis:
+    image: redis:7.2-alpine
+    container_name: real-time-chat-redis
+    restart: unless-stopped
+    ports:
+      - "6389:6379"
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --save
+      - "60"
+      - "1"
+      - --loglevel
+      - warning
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis_data:
