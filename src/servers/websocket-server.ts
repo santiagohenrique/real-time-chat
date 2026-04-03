@@ -3,7 +3,7 @@ import { parseMessage } from '../protocol/parser'
 import { RawData, WebSocket, WebSocketServer } from 'ws'
 import { handlers } from '../contexts/chat/interfaces/ws/handlers'
 import { ZodError } from 'zod'
-import { WebSocketServerEventEnum } from '../protocol/server-events.enum'
+import { WebSocketServerEventEnum } from '../protocol/enums/server-events.enum'
 
 export const registerWebSocketServer = (server: Server) => {
   const wss = new WebSocketServer({

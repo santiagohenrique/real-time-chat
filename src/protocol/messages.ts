@@ -1,11 +1,9 @@
 import { WebSocket } from 'ws'
-import { WebSocketClientEventEnum } from './client-events.enum'
+import { WebSocketClientEventEnum } from './enums/client-events.enum'
+import { JoinRoomPayload } from './schemas/zod/join-room.schema'
 
 type ClientEventPayloadMap = {
-  [WebSocketClientEventEnum.JOIN_ROOM]: {
-    roomName: string
-    userId: string
-  }
+  [WebSocketClientEventEnum.JOIN_ROOM]: JoinRoomPayload
   [WebSocketClientEventEnum.LEAVE_ROOM]: {}
   [WebSocketClientEventEnum.LIST_AVAILABLE_ROOMS]: {}
 }

@@ -1,5 +1,5 @@
 import z from 'zod'
-import { WebSocketClientEventEnum } from '../../client-events.enum'
+import { WebSocketClientEventEnum } from '../../enums/client-events.enum'
 
 export const messagePayloadSchema = z.object({
   type: z.enum(WebSocketClientEventEnum),

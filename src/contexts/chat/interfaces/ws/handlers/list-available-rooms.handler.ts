@@ -2,7 +2,7 @@ import { WebSocket } from 'ws'
 import { ListAvailableRoomsMessage } from '../../../../../protocol/messages'
 import { roomManagerService } from '.'
 import { sendServerResponse } from '../../../../../utils/send-server-response'
-import { WebSocketServerEventEnum } from '../../../../../protocol/server-events.enum'
+import { WebSocketServerEventEnum } from '../../../../../protocol/enums/server-events.enum'
 
 export const handleListAvailableRooms = (
   ws: WebSocket,
