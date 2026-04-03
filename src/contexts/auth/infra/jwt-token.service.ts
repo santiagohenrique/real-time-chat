@@ -1,21 +1,24 @@
 import jwt, { SignOptions } from 'jsonwebtoken'
 import z from 'zod'
 
+const tokenUserSchema = z.object({
+  userId: z.uuid(),
+  name: z.string().min(3).max(20),
+})
+
 const verifiedTokenPayloadSchema = z.object({
   sub: z.uuid(),
   tokenType: z.enum(['access', 'refresh']),
+  user: tokenUserSchema,
 })
 
 type TokenType = z.infer<typeof verifiedTokenPayloadSchema>['tokenType']
+type TokenUser = z.infer<typeof tokenUserSchema>
 
 type VerifiedTokenPayload = {
   userId: string
   tokenType: TokenType
-}
-
-type GenerateTokensInput = {
-  userId: string
-  name: string
+  user: TokenUser
 }
 
 export class JwtTokenService {
@@ -36,14 +39,15 @@ export class JwtTokenService {
   }
 
   private signToken(
-    data: GenerateTokensInput,
+    userData: TokenUser,
     tokenType: TokenType,
     expiresIn: NonNullable<SignOptions['expiresIn']>,
   ): string {
+    const { userId } = userData
     return jwt.sign(
       {
         tokenType,
-        user: data,
+        user: userData,
       },
       this.secretKey,
       {
@@ -51,17 +55,17 @@ export class JwtTokenService {
         audience: this.audience,
         expiresIn,
         issuer: this.issuer,
-        subject: data.userId,
+        subject: userId,
       },
     )
   }
 
-  generateTokens(data: GenerateTokensInput): {
+  generateTokens(userData: TokenUser): {
     accessToken: string
     refreshToken: string
   } {
-    const accessToken = this.signToken(data, 'access', '10m')
-    const refreshToken = this.signToken(data, 'refresh', '7d')
+    const accessToken = this.signToken(userData, 'access', '10m')
+    const refreshToken = this.signToken(userData, 'refresh', '7d')
 
     return {
       accessToken,
@@ -90,15 +94,20 @@ export class JwtTokenService {
         return null
       }
 
-      const { sub, tokenType } = parsedPayload.data
+      const { sub, tokenType, user } = parsedPayload.data
 
       if (expectedTokenType && tokenType !== expectedTokenType) {
+        return null
+      }
+
+      if (user.userId !== sub) {
         return null
       }
 
       return {
         userId: sub,
         tokenType,
+        user,
       }
     } catch {
       console.warn('[auth] Invalid token')

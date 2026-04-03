@@ -10,26 +10,25 @@ export class RegisterUserUseCase {
   constructor(private readonly jwtService: JwtTokenService) {}
 
   async execute(userData: RegisterUserInput): Promise<string> {
-    const normalizedName = userData.name.trim()
+    const displayName = userData.name
+    const normalizedName = displayName.toLowerCase()
 
     const userId = uuid()
-    const tokens = this.jwtService.generateTokens({
-      userId,
-      name: normalizedName,
-    })
+    const tokens = this.jwtService.generateTokens({ userId, name: displayName })
 
     const userCreated = await redisSetJsonIfNotExists(
-      `user:${userId}`,
+      `user:${normalizedName}`,
       {
         id: userId,
-        uuid: userId,
+        name: displayName,
+        normalizedName,
         refreshToken: tokens.refreshToken,
       },
       { ttlInSeconds: USER_TTL_SECONDS },
     )
 
     if (!userCreated) {
-      throw new UserAlreadyExistsError(normalizedName)
+      throw new UserAlreadyExistsError(displayName)
     }
 
     return tokens.accessToken

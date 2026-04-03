@@ -13,9 +13,14 @@ export class RegisterUserController {
 
       const parsedData = registerUserSchema.safeParse(userData)
       if (!parsedData.success) {
+        const flattenedErrors = parsedData.error.flatten()
+
         response.status(400).json({
           error: 'Invalid user data',
-          details: parsedData.error.message,
+          details: {
+            formErrors: flattenedErrors.formErrors,
+            fieldErrors: flattenedErrors.fieldErrors,
+          },
         })
         return
       }
@@ -24,9 +29,10 @@ export class RegisterUserController {
         name: parsedData.data.name,
       }
 
-      const token = await this.registerUserUseCase.execute(registerUserInput)
+      const accessToken =
+        await this.registerUserUseCase.execute(registerUserInput)
 
-      response.status(201).json({ token })
+      response.status(201).json({ accessToken })
     } catch (error) {
       if (error instanceof UserAlreadyExistsError) {
         response.status(409).json({
