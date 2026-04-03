@@ -36,18 +36,6 @@ const parseIntegerEnv = (
   return parsed
 }
 
-export const assertValidKey = (key: string) => {
-  if (key.trim() === '') {
-    throw new Error('[redis] Key cannot be empty')
-  }
-}
-
-export const assertValidTTL = (ttlInSeconds: number) => {
-  if (!Number.isInteger(ttlInSeconds) || ttlInSeconds <= 0) {
-    throw new Error('[redis] ttlInSeconds must be a positive integer')
-  }
-}
-
 const createRedisClient = (): RedisClient => {
   const host = process.env.REDIS_HOST?.trim() || '127.0.0.1'
   const port = parseIntegerEnv(process.env.REDIS_PORT, 6379, 'REDIS_PORT')

@@ -1,4 +1,5 @@
-import { assertValidKey, getRedisClient } from './redis-client'
+import { getRedisClient } from './redis-client'
+import { assertValidKey } from './utils'
 
 export const redisGet = async (key: string): Promise<string | null> => {
   assertValidKey(key)

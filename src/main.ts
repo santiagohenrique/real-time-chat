@@ -1,9 +1,7 @@
-import dotenv from 'dotenv'
+import 'dotenv/config'
 import { connectRedis } from './infra/redis/redis-client'
 import { server } from './servers/http-server'
 import { registerWebSocketServer } from './servers/websocket-server'
-
-dotenv.config()
 
 const PORT = process.env.PORT || 3000
 
