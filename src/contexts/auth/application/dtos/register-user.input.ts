@@ -1,3 +1,3 @@
-export type RegisterUserInput = {
+export type LoginInput = {
   name: string
 }

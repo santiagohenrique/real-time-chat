@@ -1,16 +1,16 @@
 import { Router } from 'express'
-import { RegisterUserController } from '../controllers/register-user.controller'
-import { RegisterUserUseCase } from '../../../application/use-cases/register-user.use-case'
 import { JwtTokenService } from '../../../infra/jwt-token.service'
+import { LoginController } from '../controllers/login.controller'
+import { LoginUseCase } from '../../../application/use-cases/login.use-case'
 
 const authRoutes: ReturnType<typeof Router> = Router()
 
 const jwtTokenService = new JwtTokenService()
-const registerUserUseCase = new RegisterUserUseCase(jwtTokenService)
-const registerUserController = new RegisterUserController(registerUserUseCase)
+const loginUseCase = new LoginUseCase(jwtTokenService)
+const loginController = new LoginController(loginUseCase)
 
-authRoutes.post('/register', async (request, response) => {
-  await registerUserController.handle(request, response)
+authRoutes.post('/login', async (request, response) => {
+  await loginController.handle(request, response)
 })
 
 export { authRoutes }

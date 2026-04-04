@@ -73,6 +73,25 @@ export class JwtTokenService {
     }
   }
 
+  generateTokenWithRefreshToken(refreshToken: string): {
+    accessToken: string
+    refreshToken: string
+  } {
+    const userData = this.verifyToken(refreshToken, 'refresh')
+
+    if (!userData) {
+      throw new Error('Invalid refresh token')
+    }
+
+    const accessToken = this.signToken(userData.user, 'access', '10m')
+    const newRefreshToken = this.signToken(userData.user, 'refresh', '7d')
+
+    return {
+      accessToken,
+      refreshToken: newRefreshToken,
+    }
+  }
+
   verifyToken(
     token: string,
     expectedTokenType?: TokenType,
