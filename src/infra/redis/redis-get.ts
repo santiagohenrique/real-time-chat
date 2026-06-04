@@ -21,3 +21,24 @@ export const redisGetJson = async <T>(key: string): Promise<T | null> => {
     })
   }
 }
+
+export const redisGetDel = async (key: string): Promise<string | null> => {
+  assertValidKey(key)
+  return getRedisClient().getDel(key)
+}
+
+export const redisGetDelJson = async <T>(key: string): Promise<T | null> => {
+  const value = await redisGetDel(key)
+
+  if (value === null) {
+    return null
+  }
+
+  try {
+    return JSON.parse(value) as T
+  } catch (error) {
+    throw new Error(`[redis] Value for key ${key} is not valid JSON`, {
+      cause: error,
+    })
+  }
+}
