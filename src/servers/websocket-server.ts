@@ -72,8 +72,12 @@ export const registerWebSocketServer = (
     ws.on('message', function message(data: RawData) {
       try {
         dispatchMessage(ws, data)
-      } catch (error) {
-        console.error('Error processing message:', error)
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error('Error processing message', error.stack)
+        } else {
+          console.error('Error processing message', error)
+        }
         if (error instanceof ZodError) {
           ws.send(
             JSON.stringify({

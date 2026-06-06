@@ -8,17 +8,12 @@ type ParseMessageResult = {
 }
 
 export const parseMessage = (data: RawData): ParseMessageResult => {
-  try {
-    const rawText = data.toString()
-    const rawData: unknown = JSON.parse(rawText)
-    const message = messagePayloadSchema.parse(rawData)
+  const rawText = data.toString()
+  const rawData: unknown = JSON.parse(rawText)
+  const message = messagePayloadSchema.parse(rawData)
 
-    return {
-      status: true,
-      message,
-    }
-  } catch (error) {
-    console.error('Error parsing message:', error)
-    throw error
+  return {
+    status: true,
+    message,
   }
 }
