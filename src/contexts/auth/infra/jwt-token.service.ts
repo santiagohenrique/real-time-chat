@@ -15,7 +15,7 @@ const verifiedTokenPayloadSchema = z.object({
 type TokenType = z.infer<typeof verifiedTokenPayloadSchema>['tokenType']
 export type TokenUser = z.infer<typeof tokenUserSchema>
 
-type VerifiedTokenPayload = {
+export type VerifiedTokenPayload = {
   userId: string
   tokenType: TokenType
   user: TokenUser

@@ -24,7 +24,6 @@ export const makeGenerateWsTicketController = () => {
   
   return new GenerateWsTicketController(
     generateWsTicketUseCase,
-    jwtTokenService,
   )
 }
 
