@@ -4,8 +4,8 @@ import { RawData, WebSocket, WebSocketServer } from 'ws'
 import { handlers } from '../contexts/chat/interfaces/ws/handlers'
 import { ZodError } from 'zod'
 import { WebSocketServerEventEnum } from '../protocol/enums/server-events.enum'
-import { redisGetDelJson } from '../infra/redis/redis-get'
 import { Duplex } from 'stream'
+import { WsTicketStore } from '../contexts/auth/ws-ticket.store'
 
 export type WebSocketAuth = {
   userId: string
@@ -16,7 +16,10 @@ export type AuthenticatedWebSocket = WebSocket & {
   auth: WebSocketAuth
 }
 
-export const registerWebSocketServer = (server: Server) => {
+export const registerWebSocketServer = (
+  server: Server,
+  wsTicketStore: WsTicketStore,
+) => {
 
   const wss = new WebSocketServer({
     noServer: true,
@@ -36,10 +39,8 @@ export const registerWebSocketServer = (server: Server) => {
       return
     }
 
-    const authKey = `ws:auth:${authTicket}`
-
     try {
-      const session: WebSocketAuth | null = await redisGetDelJson<WebSocketAuth>(authKey)
+      const session: WebSocketAuth | null = await wsTicketStore.consume(authTicket)
 
       if(!session) {
         rejectUpgrade(socket)

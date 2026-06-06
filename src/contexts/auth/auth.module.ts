@@ -11,7 +11,10 @@ const redisKeyValueStore = new RedisKeyValueStore()
 const redisWsTicketStore = new RedisWsTicketStore(redisKeyValueStore)
 
 const makeLoginUseCase = () => {
-  const loginUseCase = new LoginUseCase(jwtTokenService)
+  const loginUseCase = new LoginUseCase(
+    jwtTokenService,
+    redisKeyValueStore
+  )
 
   return loginUseCase
 }

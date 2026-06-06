@@ -1,12 +1,8 @@
 import { JwtTokenService } from '../../infra/jwt-token.service'
 import { randomUUID } from 'node:crypto'
-import { redisGetJson } from '../../../../infra/redis/redis-get'
 import { LoginInput } from '../dtos/register-user.input'
 import z from 'zod'
-import {
-  redisSetJson,
-  redisSetJsonIfNotExists,
-} from '../../../../infra/redis/redis-set'
+import { KeyValueStore } from '../../../../infra/key-value.store'
 
 const USER_TTL_SECONDS = 7 * 24 * 60 * 60 // 7 days in seconds
 
@@ -20,7 +16,10 @@ const cachedUserSchema = z.object({
 type CachedUser = z.infer<typeof cachedUserSchema>
 
 export class LoginUseCase {
-  constructor(private readonly jwtService: JwtTokenService) {}
+  constructor(
+    private readonly jwtService: JwtTokenService,
+    private readonly keyValueStore: KeyValueStore
+  ) {}
 
   async execute(userData: LoginInput): Promise<string> {
     const displayName = userData.name
@@ -91,14 +90,14 @@ export class LoginUseCase {
     refreshToken: string
   }): Promise<boolean> {
     const { userId, displayName, normalizedName, refreshToken } = userData
-    return redisSetJsonIfNotExists(
+    return this.keyValueStore.setIfNotExists(
       `user:${normalizedName}`,
-      {
+      JSON.stringify({
         id: userId,
         name: displayName,
         normalizedName,
         refreshToken,
-      },
+      }),
       { ttlInSeconds: USER_TTL_SECONDS },
     )
   }
@@ -106,9 +105,8 @@ export class LoginUseCase {
   private async getUserFromRedis(
     normalizedName: string,
   ): Promise<CachedUser | null> {
-    const existingUser = await redisGetJson<unknown>(`user:${normalizedName}`)
-
-    const parsedUser = cachedUserSchema.safeParse(existingUser)
+    const existingUser = await this.keyValueStore.get(`user:${normalizedName}`)
+    const parsedUser = cachedUserSchema.safeParse(JSON.parse(existingUser!))
 
     if (!parsedUser.success) {
       return null
@@ -118,8 +116,12 @@ export class LoginUseCase {
   }
 
   private async updateUserInRedis(userData: CachedUser): Promise<void> {
-    await redisSetJson(`user:${userData.normalizedName}`, userData, {
-      ttlInSeconds: USER_TTL_SECONDS,
-    })
+    await this.keyValueStore.set(
+      `user:${userData.normalizedName}`, 
+      JSON.stringify(userData), 
+      {
+        ttlInSeconds: USER_TTL_SECONDS,
+      }
+    )
   }
 }
