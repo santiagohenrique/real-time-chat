@@ -1,15 +1,13 @@
-export class Room {
-  private name: string
+class Room {
+  constructor(
+    private readonly name: string,
+    private readonly members: string[],
+  ) {}
 
-  constructor(name: string) {
-    this.name = name
+  join(userId: string): void {
+    
   }
 
-  getName() {
-    return this.name
-  }
 
-  setName(name: string) {
-    this.name = name
-  }
+
 }

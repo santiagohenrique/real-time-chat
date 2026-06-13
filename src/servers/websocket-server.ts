@@ -69,9 +69,9 @@ export const registerWebSocketServer = (
 
     const ws = rawWs as AuthenticatedWebSocket
 
-    ws.on('message', function message(data: RawData) {
+    ws.on('message', async function message(data: RawData) {
       try {
-        dispatchMessage(ws, data)
+        await dispatchMessage(ws, data)
       } catch (error: unknown) {
         if (error instanceof Error) {
           console.error('Error processing message', error.stack)
@@ -110,7 +110,7 @@ export const registerWebSocketServer = (
   return wss
 }
 
-export const dispatchMessage = (ws: AuthenticatedWebSocket, data: RawData) => {
+export const dispatchMessage = async (ws: AuthenticatedWebSocket, data: RawData) => {
   const result = parseMessage(data)
 
   if (result.status === false || result.message === null) {
@@ -120,7 +120,7 @@ export const dispatchMessage = (ws: AuthenticatedWebSocket, data: RawData) => {
 
   const handler = handlers[result.message.type]
 
-  handler(ws, result.message)
+  await handler(ws, result.message)
 }
 
 function rejectUpgrade(socket: Duplex) {

@@ -1,15 +1,13 @@
 import { WebSocket } from 'ws'
-import { ListAvailableRoomsMessage } from '../../../../../protocol/messages'
-import { roomManagerService } from '.'
 import { sendServerResponse } from '../../../../../utils/send-server-response'
 import { WebSocketServerEventEnum } from '../../../../../protocol/enums/server-events.enum'
+import { roomManagerService } from '.'
 
-export const handleListAvailableRooms = (
+export const handleListAvailableRooms = async (
   ws: WebSocket,
-  message: ListAvailableRoomsMessage
 ) => {
   try {
-    const availableRooms = roomManagerService.listAvailableRooms()
+    const availableRooms = await roomManagerService.listAvailableRoomsUseCase()
 
     sendServerResponse(ws, WebSocketServerEventEnum.SHOW_AVAILABLE_ROOMS, {
       rooms: availableRooms,

@@ -14,7 +14,7 @@ const bootstrap = async () => {
     await connectRedis()
     registerWebSocketServer(
       server,
-      wsTicketStore
+      wsTicketStore,
     )
 
     server.listen(env.PORT, () => {

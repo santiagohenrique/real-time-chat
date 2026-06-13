@@ -1,5 +1,5 @@
 export enum WebSocketClientEventEnum {
-  JOIN_ROOM = 'join_room',
+  JOIN_ROOM = 'joinRoom',
   LEAVE_ROOM = 'leave_room',
-  LIST_AVAILABLE_ROOMS = 'list_available_rooms',
+  LIST_AVAILABLE_ROOMS = 'listAvailableRooms',
 }

@@ -3,26 +3,26 @@ import {
   BaseHandler,
   JoinRoomMessage,
   LeaveRoomMessage,
-  ListAvailableRoomsMessage,
 } from '../../../../../protocol/messages'
+import { RedisRoomStore } from '../../../domain/services/redis-room.store'
 import { RoomManagerService } from '../../../domain/services/room-manager.service'
 import { handleJoinRoom } from './join-room.handler'
 import { handleLeaveRoom } from './leave-room'
 import { handleListAvailableRooms } from './list-available-rooms.handler'
 
-export const roomManagerService = new RoomManagerService()
+const roomStore = new RedisRoomStore()
+export const roomManagerService = new RoomManagerService(roomStore)
 
 export const handlers: Record<WebSocketClientEventEnum, BaseHandler> = {
-  [WebSocketClientEventEnum.JOIN_ROOM]: (ws, message) => {
+  [WebSocketClientEventEnum.JOIN_ROOM]: async (ws, message) => {
     const typedMessage = message as JoinRoomMessage
-    handleJoinRoom(ws, typedMessage)
+    await handleJoinRoom(ws, typedMessage)
   },
-  [WebSocketClientEventEnum.LEAVE_ROOM]: (ws, message) => {
+  [WebSocketClientEventEnum.LEAVE_ROOM]: async (ws, message) => {
     const typedMessage = message as LeaveRoomMessage
     handleLeaveRoom(ws, typedMessage)
   },
-  [WebSocketClientEventEnum.LIST_AVAILABLE_ROOMS]: (ws, message) => {
-    const typedMessage = message as ListAvailableRoomsMessage
-    handleListAvailableRooms(ws, typedMessage)
+  [WebSocketClientEventEnum.LIST_AVAILABLE_ROOMS]: async (ws, _message) => {
+    await handleListAvailableRooms(ws)
   },
 }
