@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
-import { KeyValueStore } from "../../infra/key-value.store";
-import { WsTicketSession, WsTicketStore } from "./ws-ticket.store";
+import { KeyValueStore } from "../../../../infra/key-value.store";
+import { WsTicketSession, WsTicketStore } from "../../application/ports/ws-ticket.store";
 
 export class RedisWsTicketStore implements WsTicketStore {
   constructor(private readonly keyValueStore: KeyValueStore) {}

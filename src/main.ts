@@ -4,7 +4,7 @@ import { server } from './servers/http-server'
 import { registerWebSocketServer } from './servers/websocket-server'
 import { env } from './configs/environment'
 import { RedisKeyValueStore } from './infra/redis/redis-key-value.store'
-import { RedisWsTicketStore } from './contexts/auth/redis-ws-ticket.store'
+import { RedisWsTicketStore } from './contexts/auth/infra/persistence/redis-ws-ticket.store'
 
 const keyValueStore = new RedisKeyValueStore()
 const wsTicketStore = new RedisWsTicketStore(keyValueStore)

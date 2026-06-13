@@ -1,4 +1,4 @@
-import { WsTicketSession, WsTicketStore } from '../../ws-ticket.store';
+import { WsTicketSession, WsTicketStore } from '../ports/ws-ticket.store';
 
 export class GenerateWsTicketUseCase {
   constructor(private readonly wsTicketStore: WsTicketStore){}

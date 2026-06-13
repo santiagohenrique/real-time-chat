@@ -5,7 +5,7 @@ import { handlers } from '../contexts/chat/interfaces/ws/handlers'
 import { ZodError } from 'zod'
 import { WebSocketServerEventEnum } from '../protocol/enums/server-events.enum'
 import { Duplex } from 'stream'
-import { WsTicketStore } from '../contexts/auth/ws-ticket.store'
+import { WsTicketStore } from '../contexts/auth/application/ports/ws-ticket.store'
 
 export type WebSocketAuth = {
   userId: string

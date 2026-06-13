@@ -4,7 +4,7 @@ import { LoginUseCase } from "./application/use-cases/login.use-case"
 import { JwtTokenService } from "./infra/jwt-token.service"
 import { GenerateWsTicketController } from "./interfaces/http/controllers/generate-ws-ticket.controller"
 import { LoginController } from "./interfaces/http/controllers/login.controller"
-import { RedisWsTicketStore } from "./redis-ws-ticket.store"
+import { RedisWsTicketStore } from "./infra/persistence/redis-ws-ticket.store"
 
 const jwtTokenService = new JwtTokenService()
 const redisKeyValueStore = new RedisKeyValueStore()
