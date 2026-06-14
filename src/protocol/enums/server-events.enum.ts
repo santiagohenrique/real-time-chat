@@ -2,7 +2,8 @@ export enum WebSocketServerEventEnum {
   USER_CREATED_ROOM = 'userCreatedRoom',
   USER_JOINED_ROOM = 'userJoinedRoom',
   USER_LEFT_ROOM = 'user_left_room',
-  SHOW_AVAILABLE_ROOMS = 'showAvailableRooms',
+  ROOM_NOT_FOUND = 'roomNotFound',
+  SHOW_ROOMS = 'showRooms',
   INVALID_PAYLOAD = 'invalid_payload',
   INVALID_SCHEMA = 'invalid_schema',
 }

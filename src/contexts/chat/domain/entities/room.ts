@@ -4,10 +4,12 @@ export class Room {
     private readonly name: string,
   ) {}
 
-  join(userId: string): void {
-    
+  getId(): string {
+    return this.id
   }
 
-
+  getName(): string {
+    return this.name
+  }
 
 }

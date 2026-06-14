@@ -8,7 +8,6 @@ import { sendServerResponse } from "../../../../../utils/send-server-response"
 export const handleCreateRoom = async (ws: AuthenticatedWebSocket, message: CreateRoomMessage) => {
   try {
     const parsedPayload = createRoomPayloadSchema.safeParse(message.data)
-    const { roomName } = message?.data
 
     if (!parsedPayload.success) {
       sendServerResponse(ws, WebSocketServerEventEnum.INVALID_SCHEMA, {
@@ -16,6 +15,8 @@ export const handleCreateRoom = async (ws: AuthenticatedWebSocket, message: Crea
       })
       return
     }
+    
+    const { roomName } = parsedPayload.data
 
     const room = await roomManagerService.createRoomUseCase({
       roomName

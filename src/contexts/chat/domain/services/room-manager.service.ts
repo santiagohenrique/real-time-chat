@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { RoomStore } from "./redis-room.store";
+import { RoomStore } from "../../application/ports/room.store";
 import { Room } from "../entities/room";
+import { RoomNotFoundError } from "../room-not-found.error";
 
 export class RoomManagerService {
   constructor(private readonly roomStore: RoomStore) {}
@@ -27,14 +28,17 @@ export class RoomManagerService {
       userId: string 
     }
   ) {
-    await this.roomStore.addUserToRoom(input.roomId, input.userId)
+    const joined = await this.roomStore.addUserToRoom(
+      input.roomId,
+      input.userId,
+    )
+
+    if (!joined) {
+      throw new RoomNotFoundError(input.roomId)
+    }
   }
 
-  async listAvailableRoomsUseCase() {
-    return await this.roomStore.listAvailableRooms()
-  }
-
-  async listUsersInAroomUseCase() {
-    return await this.roomStore.listAvailableRooms()
+  async listRoomsUseCase() {
+    return await this.roomStore.listRooms()
   }
 }

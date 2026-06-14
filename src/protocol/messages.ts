@@ -8,7 +8,7 @@ type ClientEventPayloadMap = {
     roomId: string
   }
   [WebSocketClientEventEnum.LEAVE_ROOM]: {}
-  [WebSocketClientEventEnum.LIST_AVAILABLE_ROOMS]: {}
+  [WebSocketClientEventEnum.LIST_ROOMS]: {}
 }
 
 export type WsMessage<T extends WebSocketClientEventEnum = WebSocketClientEventEnum> =
@@ -23,7 +23,7 @@ export type JoinRoomMessage = WsMessage<WebSocketClientEventEnum.JOIN_ROOM>
 
 export type LeaveRoomMessage = WsMessage<WebSocketClientEventEnum.LEAVE_ROOM>
 
-export type ListAvailableRoomsMessage =
-  WsMessage<WebSocketClientEventEnum.LIST_AVAILABLE_ROOMS>
+export type ListRoomsMessage =
+  WsMessage<WebSocketClientEventEnum.LIST_ROOMS>
 
 export type BaseHandler = (ws: AuthenticatedWebSocket, message: WsMessage) => Promise<void>
