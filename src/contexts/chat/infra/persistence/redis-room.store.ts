@@ -1,6 +1,9 @@
 import { getRedisClient } from '../../../../infra/redis/redis-client'
 import { RoomListItem } from '../../application/dtos/rooms.dto'
-import { RoomStore } from '../../application/ports/room.store'
+import {
+  AddUserToRoomResult,
+  RoomStore,
+} from '../../application/ports/room.store'
 import { Room } from '../../domain/entities/room'
 
 export class RedisRoomStore implements RoomStore {
@@ -19,26 +22,41 @@ export class RedisRoomStore implements RoomStore {
       .exec()
   }
 
-  async addUserToRoom(roomId: string, userId: string): Promise<boolean> {
+  async addUserToRoom(
+    roomId: string,
+    userId: string,
+  ): Promise<AddUserToRoomResult> {
     const roomKey = `chat:room:${roomId}`
     const roomMembersKey = `chat:room:${roomId}:members`
+    const userCurrentRoomKey = `chat:user:${userId}:current-room`
 
-    const result = await getRedisClient().eval(
+    const rawResult = await getRedisClient().eval(
       `
         if redis.call('EXISTS', KEYS[1]) == 0 then
-          return 0
+          return cjson.encode({ status = 'room_not_found' })
+        end
+
+        local currentRoomId = redis.call('GET', KEYS[3])
+
+        if currentRoomId and currentRoomId ~= ARGV[2] then
+          return cjson.encode({
+            status = 'already_in_room',
+            roomId = currentRoomId
+          })
         end
 
         redis.call('SADD', KEYS[2], ARGV[1])
-        return 1
+        redis.call('SET', KEYS[3], ARGV[2])
+
+        return cjson.encode({ status = 'joined' })
       `,
       {
-        keys: [roomKey, roomMembersKey],
-        arguments: [userId],
+        keys: [roomKey, roomMembersKey, userCurrentRoomKey],
+        arguments: [userId, roomId],
       },
     )
 
-    return result === 1
+    return JSON.parse(String(rawResult)) as AddUserToRoomResult
   }
 
   async listRooms(): Promise<RoomListItem[]> {

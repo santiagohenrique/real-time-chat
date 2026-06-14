@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { RoomStore } from "../../application/ports/room.store";
 import { Room } from "../entities/room";
 import { RoomNotFoundError } from "../room-not-found.error";
+import { UserAlreadyInRoomError } from "../user-already-in-room.error";
 
 export class RoomManagerService {
   constructor(private readonly roomStore: RoomStore) {}
@@ -28,13 +29,17 @@ export class RoomManagerService {
       userId: string 
     }
   ) {
-    const joined = await this.roomStore.addUserToRoom(
+    const joinResult = await this.roomStore.addUserToRoom(
       input.roomId,
       input.userId,
     )
 
-    if (!joined) {
+    if (joinResult.status === 'room_not_found') {
       throw new RoomNotFoundError(input.roomId)
+    }
+
+    if (joinResult.status === 'already_in_room') {
+      throw new UserAlreadyInRoomError(joinResult.roomId)
     }
   }
 

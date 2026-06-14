@@ -1,5 +1,6 @@
 import { JoinRoomMessage } from '../../../../../protocol/messages'
 import { RoomNotFoundError } from '../../../domain/room-not-found.error'
+import { UserAlreadyInRoomError } from '../../../domain/user-already-in-room.error'
 import { WebSocketServerEventEnum } from '../../../../../protocol/enums/server-events.enum'
 import { sendServerResponse } from '../../../../../utils/send-server-response'
 import { AuthenticatedWebSocket } from '../../../../../servers/websocket-server'
@@ -30,6 +31,13 @@ export const handleJoinRoom = async (ws: AuthenticatedWebSocket, message: JoinRo
   } catch (error) {
     if (error instanceof RoomNotFoundError) {
       sendServerResponse(ws, WebSocketServerEventEnum.ROOM_NOT_FOUND, {
+        message: error.message,
+      })
+      return
+    }
+
+    if (error instanceof UserAlreadyInRoomError) {
+      sendServerResponse(ws, WebSocketServerEventEnum.USER_ALREADY_IN_ROOM, {
         message: error.message,
       })
       return
