@@ -1,7 +1,7 @@
 import * as z from 'zod'
 
 export const joinRoomPayloadSchema = z.object({
-  roomName: z.string().trim().min(1, `Room name can't be empty`),
+  roomId: z.uuidv4(),
 })
 
 export type JoinRoomPayload = z.infer<typeof joinRoomPayloadSchema>

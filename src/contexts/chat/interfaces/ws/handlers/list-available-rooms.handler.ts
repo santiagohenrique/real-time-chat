@@ -7,10 +7,10 @@ export const handleListAvailableRooms = async (
   ws: WebSocket,
 ) => {
   try {
-    const availableRooms = await roomManagerService.listAvailableRoomsUseCase()
+    const rooms = await roomManagerService.listAvailableRoomsUseCase()
 
     sendServerResponse(ws, WebSocketServerEventEnum.SHOW_AVAILABLE_ROOMS, {
-      rooms: availableRooms,
+      rooms,
     })
   } catch (error) {
     console.error('Error handling list available rooms:', error)

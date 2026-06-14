@@ -1,7 +1,7 @@
-class Room {
+export class Room {
   constructor(
+    private readonly id: string,
     private readonly name: string,
-    private readonly members: string[],
   ) {}
 
   join(userId: string): void {

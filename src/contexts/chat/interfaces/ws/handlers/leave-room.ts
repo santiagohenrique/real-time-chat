@@ -2,5 +2,9 @@ import { WebSocket } from 'ws'
 import { LeaveRoomMessage } from '../../../../../protocol/messages'
 
 export const handleLeaveRoom = (ws: WebSocket, message: LeaveRoomMessage) => {
-  console.log('Cliente saiu da sala:', message.data)
+  try {
+
+  } catch(error) {
+    console.error('Error handling join room:', error)
+  }
 }

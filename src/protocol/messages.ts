@@ -1,9 +1,12 @@
 import { WebSocketClientEventEnum } from './enums/client-events.enum'
-import { JoinRoomPayload } from './schemas/zod/join-room.schema'
+import { CreateRoomPayload } from './schemas/zod/create-room.schema'
 import { AuthenticatedWebSocket } from '../servers/websocket-server'
 
 type ClientEventPayloadMap = {
-  [WebSocketClientEventEnum.JOIN_ROOM]: JoinRoomPayload
+  [WebSocketClientEventEnum.CREATE_ROOM]: CreateRoomPayload
+  [WebSocketClientEventEnum.JOIN_ROOM]: {
+    roomId: string
+  }
   [WebSocketClientEventEnum.LEAVE_ROOM]: {}
   [WebSocketClientEventEnum.LIST_AVAILABLE_ROOMS]: {}
 }
@@ -13,6 +16,8 @@ export type WsMessage<T extends WebSocketClientEventEnum = WebSocketClientEventE
     type: T
     data: ClientEventPayloadMap[T]
   }
+
+export type CreateRoomMessage = WsMessage<WebSocketClientEventEnum.CREATE_ROOM>
 
 export type JoinRoomMessage = WsMessage<WebSocketClientEventEnum.JOIN_ROOM>
 
