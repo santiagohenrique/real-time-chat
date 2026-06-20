@@ -9,7 +9,7 @@ export const handleListRooms = async (
   try {
     const rooms = await roomManagerService.listRoomsUseCase()
 
-    sendServerResponse(ws, WebSocketServerEventEnum.SHOW_ROOMS, {
+    sendServerResponse(ws, WebSocketServerEventEnum.LIST_ROOMS_RESULT, {
       rooms,
     })
   } catch (error) {

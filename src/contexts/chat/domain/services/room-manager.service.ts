@@ -3,6 +3,7 @@ import { RoomStore } from "../../application/ports/room.store";
 import { Room } from "../entities/room";
 import { RoomNotFoundError } from "../room-not-found.error";
 import { UserAlreadyInRoomError } from "../user-already-in-room.error";
+import { UserNotInRoomError } from "../user-not-in-room.error";
 
 export class RoomManagerService {
   constructor(private readonly roomStore: RoomStore) {}
@@ -45,5 +46,19 @@ export class RoomManagerService {
 
   async listRoomsUseCase() {
     return await this.roomStore.listRooms()
+  }
+
+  async leaveRoomUseCase(userId: string) {
+    const removeResult = await this.roomStore.removeUserFromCurrentRoom(userId)
+
+    if (removeResult.status === 'room_not_found') {
+      throw new RoomNotFoundError(removeResult.roomId)
+    }
+
+    if (removeResult.status === 'user_not_in_room') {
+      throw new UserNotInRoomError()
+    }
+
+    return removeResult
   }
 }

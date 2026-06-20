@@ -26,7 +26,7 @@ export const handlers: Record<WebSocketClientEventEnum, BaseHandler> = {
   },
   [WebSocketClientEventEnum.LEAVE_ROOM]: async (ws, message) => {
     const typedMessage = message as LeaveRoomMessage
-    handleLeaveRoom(ws, typedMessage)
+    await handleLeaveRoom(ws, typedMessage)
   },
   [WebSocketClientEventEnum.LIST_ROOMS]: async (ws, _message) => {
     await handleListRooms(ws)
