@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { LoginInput } from '../dtos/register-user.input'
 import z from 'zod'
 import { KeyValueStore } from '../../../../infra/key-value.store'
+import { redisKeys } from '../../../../infra/redis/redis-keys'
 
 const USER_TTL_SECONDS = 7 * 24 * 60 * 60 // 7 days in seconds
 
@@ -27,17 +28,6 @@ export class LoginUseCase {
 
     const userId = randomUUID()
     let tokens = this.jwtService.generateTokens({ userId, name: displayName })
-
-    const userCreated = await this.setUserInRedis({
-      displayName,
-      normalizedName,
-      refreshToken: tokens.refreshToken,
-      userId,
-    })
-
-    if (userCreated) {
-      return tokens.accessToken
-    }
 
     const existingUser = await this.getUserFromRedis(normalizedName)
 
@@ -90,9 +80,11 @@ export class LoginUseCase {
     refreshToken: string
   }): Promise<boolean> {
     const { userId, displayName, normalizedName, refreshToken } = userData
+    const userIdKey = redisKeys.auth.userById(userId)
+    const usernameKey = redisKeys.auth.userByName(normalizedName)
 
     await this.keyValueStore.setIfNotExists(
-      `user:name:${normalizedName}`,
+      usernameKey,
       JSON.stringify({
         id: userId,
         name: displayName,
@@ -103,7 +95,7 @@ export class LoginUseCase {
     )
 
     return await this.keyValueStore.setIfNotExists(
-      `user:${userId}`,
+      userIdKey,
       JSON.stringify({
         id: userId,
         name: displayName,
@@ -117,7 +109,8 @@ export class LoginUseCase {
   private async getUserFromRedis(
     normalizedName: string,
   ): Promise<CachedUser | null> {
-    const existingUser = await this.keyValueStore.get(`user:name:${normalizedName}`)
+    const usernameKey = redisKeys.auth.userByName(normalizedName)
+    const existingUser = await this.keyValueStore.get(usernameKey)
     const parsedUser = cachedUserSchema.safeParse(JSON.parse(existingUser!))
 
     if (!parsedUser.success) {
@@ -128,8 +121,10 @@ export class LoginUseCase {
   }
 
   private async updateUserInRedis(userData: CachedUser): Promise<void> {
+    const userIdKey = redisKeys.auth.userById(userData.id)
+
     await this.keyValueStore.set(
-      `user:${userData.id}`, 
+      userIdKey, 
       JSON.stringify(userData), 
       {
         ttlInSeconds: USER_TTL_SECONDS,

@@ -1,13 +1,14 @@
 import { randomBytes } from "node:crypto";
 import { KeyValueStore } from "../../../../infra/key-value.store";
 import { WsTicketSession, WsTicketStore } from "../../application/ports/ws-ticket.store";
+import { redisKeys } from "../../../../infra/redis/redis-keys";
 
 export class RedisWsTicketStore implements WsTicketStore {
   constructor(private readonly keyValueStore: KeyValueStore) {}
 
   async issue(session: WsTicketSession): Promise<string> {
     const wsTicket = randomBytes(32).toString('base64url')
-    const authKey = `ws:auth:${wsTicket}`
+    const authKey = redisKeys.auth.wsTicket(wsTicket)
 
     const result: boolean = await this.keyValueStore.setIfNotExists(
       authKey,
@@ -25,7 +26,7 @@ export class RedisWsTicketStore implements WsTicketStore {
   }
 
   async consume(ticket: string): Promise<WsTicketSession | null> {
-    const authKey = `ws:auth:${ticket}`
+    const authKey = redisKeys.auth.wsTicket(ticket)
     const value = await this.keyValueStore.getDel(authKey)
 
     if (value === null) {
