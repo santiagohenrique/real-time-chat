@@ -1,5 +1,4 @@
 import { WebSocketServerEventEnum } from '../../../../../protocol/enums/server-events.enum'
-import { LeaveRoomMessage } from '../../../../../protocol/messages'
 import { AuthenticatedWebSocket } from '../../../../../servers/websocket-server'
 import { sendServerResponse } from '../../../../../utils/send-server-response'
 import { RoomNotFoundError } from '../../../domain/room-not-found.error'

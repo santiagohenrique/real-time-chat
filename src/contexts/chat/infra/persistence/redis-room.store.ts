@@ -1,4 +1,5 @@
 import { getRedisClient } from '../../../../infra/redis/redis-client'
+import { redisKeys } from '../../../../infra/redis/redis-keys'
 import { RoomUsersItem } from '../../application/dtos/room-users.dto'
 import { RoomListItem } from '../../application/dtos/rooms.dto'
 import {
@@ -11,9 +12,10 @@ import { Room } from '../../domain/entities/room'
 export class RedisRoomStore implements RoomStore {
 
   async createRoom(room: Room): Promise<void> {
+    const roomsKey = redisKeys.chat.rooms()
     await getRedisClient()
       .multi()
-      .sAdd('chat:rooms', room.getId())
+      .sAdd(roomsKey, room.getId())
       .set(
         `chat:room:${room.getId()}`,
         JSON.stringify({
@@ -28,9 +30,9 @@ export class RedisRoomStore implements RoomStore {
     roomId: string,
     userId: string,
   ): Promise<AddUserToRoomResult> {
-    const roomKey = `chat:room:${roomId}`
-    const roomMembersKey = `chat:room:${roomId}:members`
-    const userCurrentRoomKey = `chat:user:${userId}:current-room`
+    const roomKey = redisKeys.chat.roomById(roomId)
+    const roomMembersKey = redisKeys.chat.roomMembers(roomId)
+    const userCurrentRoomKey = redisKeys.chat.userCurrentRoom(userId)
 
     const rawResult = await getRedisClient().eval(
       `
@@ -62,13 +64,14 @@ export class RedisRoomStore implements RoomStore {
   }
 
   async listRooms(): Promise<RoomListItem[]> {
-    const roomIds = await getRedisClient().sMembers('chat:rooms')
+    const roomsKey = redisKeys.chat.rooms()
+    const roomIds = await getRedisClient().sMembers(roomsKey)
 
     if (roomIds.length === 0) {
       return []
     }
 
-    const roomKeys = roomIds.map((roomId) => `chat:room:${roomId}`)
+    const roomKeys = roomIds.map((roomId) => redisKeys.chat.roomById(roomId))
     const rawRooms = await getRedisClient().mGet(roomKeys)
 
     return rawRooms
@@ -77,12 +80,11 @@ export class RedisRoomStore implements RoomStore {
   }
 
   async listRoomUsers(roomId: string): Promise<RoomUsersItem[]> {
-    const roomMembersKey = `chat:room:${roomId}:members`
+    const roomMembersKey = redisKeys.chat.roomMembers(roomId)
     const rawUsersId = await getRedisClient().sMembers(roomMembersKey)
 
-    
     const usersPromises = rawUsersId.map(async (userId) => {
-      const userKey = `user:${userId}`
+      const userKey = redisKeys.auth.userById(userId)
       const rawUser = await getRedisClient().get(userKey)
 
       if (!rawUser) {
@@ -105,7 +107,8 @@ export class RedisRoomStore implements RoomStore {
   async removeUserFromCurrentRoom(
     userId: string,
   ): Promise<RemoveUserFromCurrentRoomResult> {
-    const userCurrentRoomKey = `chat:user:${userId}:current-room`
+    const roomMembersKey = redisKeys.chat.userCurrentRoom(userId)
+    const userCurrentRoomKey = roomMembersKey
 
     const rawResult = await getRedisClient().eval(
       `

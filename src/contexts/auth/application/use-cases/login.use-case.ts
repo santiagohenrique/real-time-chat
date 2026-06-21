@@ -32,21 +32,21 @@ export class LoginUseCase {
     const existingUser = await this.getUserFromRedis(normalizedName)
 
     if (!existingUser) {
-      const recoveredByCreate = await this.setUserInRedis({
+      const userCreated = await this.setUserInRedis({
         displayName,
         normalizedName,
         refreshToken: tokens.refreshToken,
         userId,
       })
 
-      if (recoveredByCreate) {
+      if (userCreated) {
         return tokens.accessToken
       }
 
       const reloadedUser = await this.getUserFromRedis(normalizedName)
 
       if (!reloadedUser) {
-        throw new Error('User exists but could not be loaded from Redis')
+        throw new Error('User could not be persisted or reloaded from Redis')
       }
 
       tokens = this.jwtService.generateTokenWithRefreshToken(
