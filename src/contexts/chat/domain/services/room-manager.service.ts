@@ -48,6 +48,14 @@ export class RoomManagerService {
     return await this.roomStore.listRooms()
   }
 
+  async listRoomUsersUseCase(
+    input: { 
+      roomId: string;
+    }
+  ) {
+    return await this.roomStore.listRoomUsers(input.roomId)
+  }
+
   async leaveRoomUseCase(userId: string) {
     const removeResult = await this.roomStore.removeUserFromCurrentRoom(userId)
 

@@ -8,7 +8,6 @@ import { roomManagerService } from '.'
 
 export const handleLeaveRoom = async (
   ws: AuthenticatedWebSocket,
-  _message: LeaveRoomMessage,
 ) => {
   try {
     const result = await roomManagerService.leaveRoomUseCase(ws.auth.userId)

@@ -1,4 +1,5 @@
 import { getRedisClient } from '../../../../infra/redis/redis-client'
+import { RoomUsersItem } from '../../application/dtos/room-users.dto'
 import { RoomListItem } from '../../application/dtos/rooms.dto'
 import {
   AddUserToRoomResult,
@@ -63,12 +64,42 @@ export class RedisRoomStore implements RoomStore {
   async listRooms(): Promise<RoomListItem[]> {
     const roomIds = await getRedisClient().sMembers('chat:rooms')
 
+    if (roomIds.length === 0) {
+      return []
+    }
+
     const roomKeys = roomIds.map((roomId) => `chat:room:${roomId}`)
     const rawRooms = await getRedisClient().mGet(roomKeys)
 
     return rawRooms
       .filter((room): room is string => room !== null)
       .map((room) => JSON.parse(room) as RoomListItem)
+  }
+
+  async listRoomUsers(roomId: string): Promise<RoomUsersItem[]> {
+    const roomMembersKey = `chat:room:${roomId}:members`
+    const rawUsersId = await getRedisClient().sMembers(roomMembersKey)
+
+    
+    const usersPromises = rawUsersId.map(async (userId) => {
+      const userKey = `user:${userId}`
+      const rawUser = await getRedisClient().get(userKey)
+
+      if (!rawUser) {
+        return null
+      }
+
+      const userDetails: RoomUsersItem = JSON.parse(rawUser)
+
+      return {
+        id: userDetails.id,
+        name: userDetails.name,
+      }
+    })
+
+    const usersList = await Promise.all(usersPromises)
+
+    return usersList.filter((user): user is RoomUsersItem => user !== null) 
   }
 
   async removeUserFromCurrentRoom(

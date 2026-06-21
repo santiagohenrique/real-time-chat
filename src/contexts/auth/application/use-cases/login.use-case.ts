@@ -83,15 +83,27 @@ export class LoginUseCase {
     return tokens.accessToken
   }
 
-  private setUserInRedis(userData: {
+  private async setUserInRedis(userData: {
     userId: string
     displayName: string
     normalizedName: string
     refreshToken: string
   }): Promise<boolean> {
     const { userId, displayName, normalizedName, refreshToken } = userData
-    return this.keyValueStore.setIfNotExists(
-      `user:${normalizedName}`,
+
+    await this.keyValueStore.setIfNotExists(
+      `user:name:${normalizedName}`,
+      JSON.stringify({
+        id: userId,
+        name: displayName,
+        normalizedName,
+        refreshToken,
+      }),
+      { ttlInSeconds: USER_TTL_SECONDS },
+    )
+
+    return await this.keyValueStore.setIfNotExists(
+      `user:${userId}`,
       JSON.stringify({
         id: userId,
         name: displayName,
@@ -105,7 +117,7 @@ export class LoginUseCase {
   private async getUserFromRedis(
     normalizedName: string,
   ): Promise<CachedUser | null> {
-    const existingUser = await this.keyValueStore.get(`user:${normalizedName}`)
+    const existingUser = await this.keyValueStore.get(`user:name:${normalizedName}`)
     const parsedUser = cachedUserSchema.safeParse(JSON.parse(existingUser!))
 
     if (!parsedUser.success) {
@@ -117,7 +129,7 @@ export class LoginUseCase {
 
   private async updateUserInRedis(userData: CachedUser): Promise<void> {
     await this.keyValueStore.set(
-      `user:${userData.normalizedName}`, 
+      `user:${userData.id}`, 
       JSON.stringify(userData), 
       {
         ttlInSeconds: USER_TTL_SECONDS,
