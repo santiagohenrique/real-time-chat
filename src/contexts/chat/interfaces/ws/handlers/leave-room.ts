@@ -11,6 +11,7 @@ export const handleLeaveRoom = async (
 ) => {
   try {
     const result = await dependencies.roomManagerService.leaveRoomUseCase(ws.auth.userId)
+    const { roomId } = result
 
     if(result.status === 'success') {
       ws.currentRoomId = null
@@ -19,6 +20,19 @@ export const handleLeaveRoom = async (
     sendServerResponse(ws, WebSocketServerEventEnum.ROOM_LEFT, {
       roomId: result.roomId,
       roomDeleted: result.roomDeleted,
+    })
+
+    dependencies.roomBroadcaster.broadcastToRoom({
+      roomId,
+      excludeWs: ws,
+      event: WebSocketServerEventEnum.USER_LEFT_ROOM,
+      data: {
+        roomId,
+        user: {
+          id: ws.auth.userId,
+          name: ws.auth.name,
+        },
+      },
     })
   } catch (error) {
     if (error instanceof RoomNotFoundError) {

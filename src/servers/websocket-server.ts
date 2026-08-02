@@ -26,7 +26,6 @@ export const registerWebSocketServer = (
   server: Server,
   wsTicketStore: WsTicketStore,
 ) => {
-
   const wss = new WebSocketServer({
     noServer: true,
     clientTracking: true,
@@ -38,6 +37,34 @@ export const registerWebSocketServer = (
     roomManagerService,
     roomBroadcaster,
   })
+  const activeConnections = new Map<string, AuthenticatedWebSocket>()
+
+  const replaceActiveConnection = (ws: AuthenticatedWebSocket) => {
+    const userId = ws.auth.userId
+    const previousConnection = activeConnections.get(userId)
+
+    if (previousConnection && previousConnection !== ws) {
+      ws.currentRoomId = previousConnection.currentRoomId
+      previousConnection.currentRoomId = null
+    }
+
+    activeConnections.set(userId, ws)
+
+    if (previousConnection && previousConnection !== ws) {
+      previousConnection.close(4000, 'Replaced by a newer connection')
+    }
+  }
+
+  const unregisterActiveConnection = (ws: AuthenticatedWebSocket) => {
+    const currentConnection = activeConnections.get(ws.auth.userId)
+
+    if (currentConnection !== ws) {
+      return false
+    }
+
+    activeConnections.delete(ws.auth.userId)
+    return true
+  }
 
   server.on('upgrade', async function(request, socket, head) {
     const searchParams = new URL(
@@ -80,10 +107,12 @@ export const registerWebSocketServer = (
   })
 
   wss.on('connection', function connection(rawWs) {
+    const ws = rawWs as AuthenticatedWebSocket
+    replaceActiveConnection(ws)
+    
     console.log('New client connected!')
     console.log(`Total clients connected: ${wss.clients.size}`)
 
-    const ws = rawWs as AuthenticatedWebSocket
     ws.on('message', async function message(data: RawData) {
       try {
         await dispatchMessage(ws, data, handlers)
@@ -117,9 +146,27 @@ export const registerWebSocketServer = (
     })
 
     ws.on('close', async () => {
+      if (!unregisterActiveConnection(ws)) {
+        return
+      }
+
       try {
-        await roomManagerService.leaveRoomUseCase(ws.auth.userId)
+        const result = await roomManagerService.leaveRoomUseCase(ws.auth.userId)
+        const { roomId } = result
         ws.currentRoomId = null
+
+        roomBroadcaster.broadcastToRoom({
+          roomId,
+          excludeWs: ws,
+          event: WebSocketServerEventEnum.USER_LEFT_ROOM,
+          data: {
+            roomId,
+            user: {
+              id: ws.auth.userId,
+              name: ws.auth.name,
+            },
+          },
+        })
       } catch (error) {
         if (error instanceof UserNotInRoomError) {
           return

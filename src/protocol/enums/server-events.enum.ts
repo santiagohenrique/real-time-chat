@@ -4,6 +4,7 @@ export enum WebSocketServerEventEnum {
   USER_JOINED_ROOM = 'userJoinedRoom',
   USER_ALREADY_IN_ROOM = 'userAlreadyInRoom',
   ROOM_LEFT = 'roomLeft',
+  USER_LEFT_ROOM = 'userLeftRoom',
   USER_NOT_IN_ROOM = 'userNotInRoom',
   ROOM_NOT_FOUND = 'roomNotFound',
   LIST_ROOMS_RESULT = 'listRoomsResult',
