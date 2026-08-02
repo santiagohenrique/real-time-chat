@@ -53,7 +53,14 @@ export class RoomManagerService {
       roomId: string;
     }
   ) {
-    return await this.roomStore.listRoomUsers(input.roomId)
+    const { roomId } = input
+    const roomExists = await this.roomStore.roomExists(roomId)
+
+    if(!roomExists) {
+      throw new RoomNotFoundError(roomId) 
+    }
+    
+    return await this.roomStore.listRoomUsers(roomId)
   }
 
   async leaveRoomUseCase(userId: string) {

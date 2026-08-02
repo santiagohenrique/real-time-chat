@@ -1,11 +1,16 @@
 import { Server } from 'http'
 import { parseMessage } from '../protocol/parser'
-import { RawData, WebSocket, WebSocketServer } from 'ws'
-import { handlers } from '../contexts/chat/interfaces/ws/handlers'
+import { RawData, WebSocket } from 'ws'
+import { createHandlers } from '../contexts/chat/interfaces/ws/handlers'
 import { ZodError } from 'zod'
 import { WebSocketServerEventEnum } from '../protocol/enums/server-events.enum'
 import { Duplex } from 'stream'
 import { WsTicketStore } from '../contexts/auth/application/ports/ws-ticket.store'
+import { UserNotInRoomError } from '../contexts/chat/domain/user-not-in-room.error'
+import { RoomManagerService } from '../contexts/chat/domain/services/room-manager.service'
+import { RedisRoomStore } from '../contexts/chat/infra/persistence/redis-room.store'
+import { createRoomBroadcaster } from '../contexts/chat/interfaces/ws/broadcasters/room-broadcaster'
+import { WebSocketServer } from 'ws'
 
 export type WebSocketAuth = {
   userId: string
@@ -14,6 +19,7 @@ export type WebSocketAuth = {
 
 export type AuthenticatedWebSocket = WebSocket & {
   auth: WebSocketAuth
+  currentRoomId: string | null
 }
 
 export const registerWebSocketServer = (
@@ -24,6 +30,13 @@ export const registerWebSocketServer = (
   const wss = new WebSocketServer({
     noServer: true,
     clientTracking: true,
+  })
+  const roomStore = new RedisRoomStore()
+  const roomManagerService = new RoomManagerService(roomStore)
+  const roomBroadcaster = createRoomBroadcaster(wss)
+  const handlers = createHandlers({
+    roomManagerService,
+    roomBroadcaster,
   })
 
   server.on('upgrade', async function(request, socket, head) {
@@ -49,10 +62,13 @@ export const registerWebSocketServer = (
 
       wss.handleUpgrade(request, socket, head, function(rawWs) {
         const ws = rawWs as AuthenticatedWebSocket
+        
         ws.auth = {
           userId: session.userId,
           name: session.name,
         }
+
+        ws.currentRoomId = null
   
         wss.emit('connection', ws, request)
       })
@@ -68,10 +84,9 @@ export const registerWebSocketServer = (
     console.log(`Total clients connected: ${wss.clients.size}`)
 
     const ws = rawWs as AuthenticatedWebSocket
-
     ws.on('message', async function message(data: RawData) {
       try {
-        await dispatchMessage(ws, data)
+        await dispatchMessage(ws, data, handlers)
       } catch (error: unknown) {
         if (error instanceof Error) {
           console.error('Error processing message', error.stack)
@@ -101,16 +116,28 @@ export const registerWebSocketServer = (
       }
     })
 
-    ws.on('close', function close() {
-      console.log('Client disconnected')
-      console.log(`Total clients connected: ${wss.clients.size}`)
+    ws.on('close', async () => {
+      try {
+        await roomManagerService.leaveRoomUseCase(ws.auth.userId)
+        ws.currentRoomId = null
+      } catch (error) {
+        if (error instanceof UserNotInRoomError) {
+          return
+        }
+
+        console.error('Error handling socket close:', error)
+      }
     })
   })
 
   return wss
 }
 
-export const dispatchMessage = async (ws: AuthenticatedWebSocket, data: RawData) => {
+export const dispatchMessage = async (
+  ws: AuthenticatedWebSocket,
+  data: RawData,
+  handlers: ReturnType<typeof createHandlers>,
+) => {
   const result = parseMessage(data)
 
   if (result.status === false || result.message === null) {
@@ -119,7 +146,6 @@ export const dispatchMessage = async (ws: AuthenticatedWebSocket, data: RawData)
   }
 
   const handler = handlers[result.message.type]
-
   await handler(ws, result.message)
 }
 

@@ -1,11 +1,15 @@
-import { roomManagerService } from "."
+import { HandlerDeps } from "."
 import { WebSocketServerEventEnum } from "../../../../../protocol/enums/server-events.enum"
 import { CreateRoomMessage } from "../../../../../protocol/messages"
 import { createRoomPayloadSchema } from "../../../../../protocol/schemas/zod/create-room.schema"
 import { AuthenticatedWebSocket } from "../../../../../servers/websocket-server"
 import { sendServerResponse } from "../../../../../utils/send-server-response"
 
-export const handleCreateRoom = async (ws: AuthenticatedWebSocket, message: CreateRoomMessage) => {
+export const handleCreateRoom = async (
+  ws: AuthenticatedWebSocket,
+  message: CreateRoomMessage,
+  dependencies: HandlerDeps,
+) => {
   try {
     const parsedPayload = createRoomPayloadSchema.safeParse(message.data)
 
@@ -18,7 +22,7 @@ export const handleCreateRoom = async (ws: AuthenticatedWebSocket, message: Crea
     
     const { roomName } = parsedPayload.data
 
-    const room = await roomManagerService.createRoomUseCase({
+    const room = await dependencies.roomManagerService.createRoomUseCase({
       roomName
     })
 

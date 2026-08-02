@@ -18,4 +18,5 @@ export interface RoomStore {
   listRooms(): Promise<RoomListItem[]>
   listRoomUsers(roomId: string): Promise<RoomUsersItem[]>
   removeUserFromCurrentRoom(userId: string): Promise<RemoveUserFromCurrentRoomResult>
+  roomExists(roomId: string): Promise<boolean>
 }

@@ -13,11 +13,13 @@ export class RedisRoomStore implements RoomStore {
 
   async createRoom(room: Room): Promise<void> {
     const roomsKey = redisKeys.chat.rooms()
+    const roomKey = redisKeys.chat.roomById(room.getId())
+
     await getRedisClient()
       .multi()
       .sAdd(roomsKey, room.getId())
       .set(
-        `chat:room:${room.getId()}`,
+        roomKey,
         JSON.stringify({
           id: room.getId(),
           name: room.getName(),
@@ -107,8 +109,10 @@ export class RedisRoomStore implements RoomStore {
   async removeUserFromCurrentRoom(
     userId: string,
   ): Promise<RemoveUserFromCurrentRoomResult> {
-    const roomMembersKey = redisKeys.chat.userCurrentRoom(userId)
-    const userCurrentRoomKey = roomMembersKey
+    const userCurrentRoomKey = redisKeys.chat.userCurrentRoom(userId)
+    const roomsKey = redisKeys.chat.rooms()
+    const roomKeyPrefix = redisKeys.chat.roomPrefix()
+    const roomMembersSuffix = redisKeys.chat.roomMembersSuffix()
 
     const rawResult = await getRedisClient().eval(
       `
@@ -118,8 +122,8 @@ export class RedisRoomStore implements RoomStore {
           return cjson.encode({ status = 'user_not_in_room' })
         end
 
-        local roomKey = 'chat:room:' .. currentRoomId
-        local roomMembersKey = 'chat:room:' .. currentRoomId .. ':members'
+        local roomKey = ARGV[2] .. currentRoomId
+        local roomMembersKey = ARGV[2] .. currentRoomId .. ARGV[3]
 
         if redis.call('EXISTS', roomKey) == 0 then
           redis.call('DEL', KEYS[1])
@@ -156,11 +160,16 @@ export class RedisRoomStore implements RoomStore {
         })
       `,
       {
-        keys: [userCurrentRoomKey, 'chat:rooms'],
-        arguments: [userId],
+        keys: [userCurrentRoomKey, roomsKey],
+        arguments: [userId, roomKeyPrefix, roomMembersSuffix],
       },
     )
 
     return JSON.parse(String(rawResult)) as RemoveUserFromCurrentRoomResult
+  }
+
+  async roomExists(roomId: string): Promise<boolean> {
+    const roomKey = redisKeys.chat.roomById(roomId)
+    return (await getRedisClient().exists(roomKey)) === 1
   }
 }

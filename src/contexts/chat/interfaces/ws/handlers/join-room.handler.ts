@@ -4,10 +4,14 @@ import { UserAlreadyInRoomError } from '../../../domain/user-already-in-room.err
 import { WebSocketServerEventEnum } from '../../../../../protocol/enums/server-events.enum'
 import { sendServerResponse } from '../../../../../utils/send-server-response'
 import { AuthenticatedWebSocket } from '../../../../../servers/websocket-server'
-import { roomManagerService } from '.'
 import { joinRoomPayloadSchema } from '../../../../../protocol/schemas/zod/join-room.schema'
+import { HandlerDeps } from '.'
 
-export const handleJoinRoom = async (ws: AuthenticatedWebSocket, message: JoinRoomMessage) => {
+export const handleJoinRoom = async (
+  ws: AuthenticatedWebSocket, 
+  message: JoinRoomMessage,
+  dependencies: HandlerDeps
+) => {
   try {
     const parsedPayload = joinRoomPayloadSchema.safeParse(message.data)
 
@@ -20,13 +24,28 @@ export const handleJoinRoom = async (ws: AuthenticatedWebSocket, message: JoinRo
 
     const { roomId } = parsedPayload.data
 
-    await roomManagerService.joinRoomUseCase({
+    await dependencies.roomManagerService.joinRoomUseCase({
       roomId,
       userId: ws.auth.userId
     })
 
-    sendServerResponse(ws, WebSocketServerEventEnum.USER_JOINED_ROOM, {
+    ws.currentRoomId = roomId
+
+    sendServerResponse(ws, WebSocketServerEventEnum.ROOM_JOINED, {
       roomId,
+    })
+
+    dependencies.roomBroadcaster.broadcastToRoom({
+      roomId,
+      excludeWs: ws,
+      event: WebSocketServerEventEnum.USER_JOINED_ROOM,
+      data: {
+        roomId,
+        user: {
+          id: ws.auth.userId,
+          name: ws.auth.name,
+        },
+      },
     })
   } catch (error) {
     if (error instanceof RoomNotFoundError) {

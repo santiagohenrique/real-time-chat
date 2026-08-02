@@ -3,15 +3,20 @@ import { AuthenticatedWebSocket } from '../../../../../servers/websocket-server'
 import { sendServerResponse } from '../../../../../utils/send-server-response'
 import { RoomNotFoundError } from '../../../domain/room-not-found.error'
 import { UserNotInRoomError } from '../../../domain/user-not-in-room.error'
-import { roomManagerService } from '.'
+import { HandlerDeps } from '.'
 
 export const handleLeaveRoom = async (
   ws: AuthenticatedWebSocket,
+  dependencies: HandlerDeps,
 ) => {
   try {
-    const result = await roomManagerService.leaveRoomUseCase(ws.auth.userId)
+    const result = await dependencies.roomManagerService.leaveRoomUseCase(ws.auth.userId)
 
-    sendServerResponse(ws, WebSocketServerEventEnum.USER_LEFT_ROOM, {
+    if(result.status === 'success') {
+      ws.currentRoomId = null
+    } 
+
+    sendServerResponse(ws, WebSocketServerEventEnum.ROOM_LEFT, {
       roomId: result.roomId,
       roomDeleted: result.roomDeleted,
     })
