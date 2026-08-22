@@ -11,4 +11,5 @@ export enum WebSocketServerEventEnum {
   LIST_ROOM_USERS_RESULT = 'listRoomUsersResult',
   INVALID_PAYLOAD = 'invalid_payload',
   INVALID_SCHEMA = 'invalid_schema',
+  ROOM_MESSAGE_RECEIVED = 'roomMessageReceived'
 }

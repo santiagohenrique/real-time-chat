@@ -4,14 +4,16 @@ import {
   CreateRoomMessage,
   JoinRoomMessage,
   ListRoomUsersMessage,
+  SendRoomMessage,
 } from '../../../../../protocol/messages'
 import { RoomManagerService } from '../../../domain/services/room-manager.service'
+import { RoomBroadcaster } from '../broadcasters/room-broadcaster'
 import { handleCreateRoom } from './create-room.handler'
 import { handleJoinRoom } from './join-room.handler'
 import { handleLeaveRoom } from './leave-room'
-import { handleListRooms } from './list-rooms.handler'
 import { handleListRoomUsers } from './list-room-users.handler'
-import { RoomBroadcaster } from '../broadcasters/room-broadcaster'
+import { handleListRooms } from './list-rooms.handler'
+import { handleSendRoomMessage } from './send-room-message.handler'
 
 export type HandlerDeps = {
   roomManagerService: RoomManagerService
@@ -39,4 +41,8 @@ export const createHandlers = (
     const typedMessage = message as ListRoomUsersMessage
     await handleListRoomUsers(ws, typedMessage, dependencies)
   },
+  [WebSocketClientEventEnum.SEND_ROOM_MESSAGE]: async(ws, message) => {
+    const typedMessage = message as SendRoomMessage
+    await handleSendRoomMessage(ws, typedMessage, dependencies)
+  }
 })

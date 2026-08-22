@@ -4,6 +4,23 @@ import { Room } from "../entities/room";
 import { RoomNotFoundError } from "../room-not-found.error";
 import { UserAlreadyInRoomError } from "../user-already-in-room.error";
 import { UserNotInRoomError } from "../user-not-in-room.error";
+import { WebSocketAuth } from "../../../../servers/websocket-server";
+
+export type SendRoomMessageInput = {
+  user: WebSocketAuth
+  text: string
+}
+
+export type SendRoomMessageOutput = {
+  messageId: string
+  roomId: string
+  text: string
+  sentAt: string
+  user: {
+    id: string
+    name: string
+  }
+}
 
 export class RoomManagerService {
   constructor(private readonly roomStore: RoomStore) {}
@@ -75,5 +92,34 @@ export class RoomManagerService {
     }
 
     return removeResult
+  }
+
+  async sendRoomMessageUseCase(
+    user: WebSocketAuth,
+    text: string
+  ) {
+    const { userId, name } = user
+    const roomId = await this.roomStore.getCurrentRoomId(userId)
+
+    if (!roomId) {
+      throw new UserNotInRoomError()
+    }
+
+    const roomExists = await this.roomStore.roomExists(roomId)
+
+    if (!roomExists) {
+      throw new RoomNotFoundError(roomId)
+    }
+
+    return {
+      messageId: randomUUID(),
+      roomId,
+      text,
+      sentAt: new Date().toISOString(),
+      user: {
+        userId,
+        name,
+      }
+    }
   }
 }

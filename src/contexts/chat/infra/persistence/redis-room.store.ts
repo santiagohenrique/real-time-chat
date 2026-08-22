@@ -172,4 +172,10 @@ export class RedisRoomStore implements RoomStore {
     const roomKey = redisKeys.chat.roomById(roomId)
     return (await getRedisClient().exists(roomKey)) === 1
   }
+
+  async getCurrentRoomId(userId: string): Promise<string | null> {
+    const userCurrentRoomKey = redisKeys.chat.userCurrentRoom(userId)
+    
+    return await getRedisClient().get(userCurrentRoomKey)
+  }
 }

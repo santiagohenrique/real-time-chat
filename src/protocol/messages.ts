@@ -2,13 +2,15 @@ import { WebSocketClientEventEnum } from './enums/client-events.enum'
 import { CreateRoomPayload } from './schemas/zod/create-room.schema'
 import { AuthenticatedWebSocket } from '../servers/websocket-server'
 import { JoinRoomPayload } from './schemas/zod/join-room.schema'
+import { SendRoomMessagePayload } from './schemas/zod/send-room-message.schema'
 
 type ClientEventPayloadMap = {
   [WebSocketClientEventEnum.CREATE_ROOM]: CreateRoomPayload
   [WebSocketClientEventEnum.JOIN_ROOM]: JoinRoomPayload
   [WebSocketClientEventEnum.LEAVE_ROOM]: undefined
   [WebSocketClientEventEnum.LIST_ROOMS]: undefined
-  [WebSocketClientEventEnum.LIST_ROOM_USERS]: JoinRoomPayload
+  [WebSocketClientEventEnum.LIST_ROOM_USERS]: JoinRoomPayload,
+  [WebSocketClientEventEnum.SEND_ROOM_MESSAGE]: SendRoomMessagePayload
 }
 
 export type WsMessage<T extends WebSocketClientEventEnum = WebSocketClientEventEnum> =
@@ -30,5 +32,7 @@ export type ListRoomsMessage =
 
 export type ListRoomUsersMessage =
   WsMessage<WebSocketClientEventEnum.LIST_ROOM_USERS>
+
+export type SendRoomMessage = WsMessage<WebSocketClientEventEnum.SEND_ROOM_MESSAGE>
 
 export type BaseHandler = (ws: AuthenticatedWebSocket, message: WsMessage) => Promise<void>
