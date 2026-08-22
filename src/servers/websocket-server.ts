@@ -87,6 +87,10 @@ export const registerWebSocketServer = (
         return
       }
 
+      const hydratedCurrentRoomId = await roomStore.getCurrentRoomId(
+        session.userId,
+      )
+
       wss.handleUpgrade(request, socket, head, function(rawWs) {
         const ws = rawWs as AuthenticatedWebSocket
         
@@ -95,7 +99,7 @@ export const registerWebSocketServer = (
           name: session.name,
         }
 
-        ws.currentRoomId = null
+        ws.currentRoomId = hydratedCurrentRoomId
   
         wss.emit('connection', ws, request)
       })
