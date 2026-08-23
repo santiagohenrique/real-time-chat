@@ -133,7 +133,7 @@ export const disconnectRedis = async (): Promise<void> => {
       '[redis] Failed graceful shutdown, forcing disconnect:',
       error
     )
-    client.disconnect()
+    client.destroy()
   }
 }
 
